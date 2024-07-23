@@ -1,0 +1,82 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sonarr
+  namespace: media
+spec:
+  chart:
+    spec:
+      type: oci
+      chart: oci://tccr.io/truecharts/sonarr
+  interval: 10m
+  install:
+    createNamespace: true
+  values:
+    image:
+      tag: develop
+    persistence:
+      config:
+        enabled: true
+        storageClass: "longhorn"
+        accessMode: ReadWriteOnce
+        size: 1Gi
+      downloads:
+        enabled: true
+        storageClass: "longhorn"
+        accessMode: ReadWriteOnce
+        size: 10Gi
+      tv:
+        enabled: true
+        storageClass: "longhorn"
+        accessMode: ReadWriteOnce
+        size: 100Gi
+    env:
+      - name: TZ
+        value: "Your/Timezone" # Replace with $TZ
+      - name: PUID
+        value: "1000" # Replace with $PUID
+      - name: PGID
+        value: "1000" # Replace with $PGID
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "300Mi"
+        pid: "50"
+      requests:
+        cpu: "250m"
+        memory: "20Mi"
+    securityContext:
+      capabilities:
+        drop: ["ALL"]
+      runAsNonRoot: true
+      runAsUser: 1000 # Replace with $PUID
+      runAsGroup: 1000 # Replace with $PGID
+      fsGroup: 1000 # Replace with $PGID
+    service:
+      main:
+        type: ClusterIP
+        ports:
+          - port: 8989
+            targetPort: 8989
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "web"
+          traefik.ingress.kubernetes.io/router.priority: "1"
+        hosts:
+          - host: sonarr.local
+            paths:
+              - path: /
+                pathType: Prefix
+    healthCheck:
+      enabled: true
+      httpGet:
+        path: /ping
+        port: 8989
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 2
+      successThreshold: 1

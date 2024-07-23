@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: metallb
+  namespace: metallb-system
+spec:
+  chart:
+    spec:
+      chart: metallb
+      version: 2.5.0
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+  interval: 10m
+  install:
+    createNamespace: true
+  values:
+    configInline:
+      address-pools:
+      - name: default
+        protocol: layer2
+        addresses:
+        - 192.168.1.240-192.168.1.250

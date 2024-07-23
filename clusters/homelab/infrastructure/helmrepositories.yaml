@@ -1,0 +1,27 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: bitnami
+  namespace: flux-system
+spec:
+  url: https://charts.bitnami.com/bitnami
+  interval: 10m
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: jetstack
+  namespace: flux-system
+spec:
+  url: https://charts.jetstack.io
+  interval: 10m
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: truecharts
+  namespace: flux-system
+spec:
+  type: oci
+  url: oci://tccr.io/truecharts
+  interval: 10m
